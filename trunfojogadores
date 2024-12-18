@@ -25,16 +25,53 @@ typedef struct {
     int FISICO;
 } JOGADOR;
 
-// Função para cadastrar novos jogadores
-void cadastrar_jogadores() {
-    FILE *arq = fopen("jogadores.dat", "ab");
+// Função para carregar todos os jogadores do arquivo para a memória
+JOGADOR* carregar_jogadores(int* tamanho) {
+    FILE *arq = fopen("jogadores.dat", "rb");
+    if (arq == NULL) {
+        // Arquivo inexistente, inicia com 0 jogadores
+        *tamanho = 0;
+        return NULL;
+    }
+
+    // Calcula o número de jogadores no arquivo
+    fseek(arq, 0, SEEK_END);
+    *tamanho = ftell(arq) / sizeof(JOGADOR);
+    rewind(arq);
+
+    // Aloca memória para os jogadores
+    JOGADOR *vetor = (JOGADOR *)malloc((*tamanho) * sizeof(JOGADOR));
+    if (vetor == NULL) {
+        printf("Erro ao alocar memória.\n");
+        fclose(arq);
+        *tamanho = 0;
+        return NULL;
+    }
+
+    fread(vetor, sizeof(JOGADOR), *tamanho, arq);
+    fclose(arq);
+    return vetor;
+}
+
+// Função para salvar todos os jogadores da memória no arquivo
+void salvar_jogadores(JOGADOR *vetor, int tamanho) {
+    FILE *arq = fopen("jogadores.dat", "wb");
     if (arq == NULL) {
         printf("Erro ao abrir o arquivo.\n");
         return;
     }
+    fwrite(vetor, sizeof(JOGADOR), tamanho, arq);
+    fclose(arq);
+}
 
-    JOGADOR jogador;
+// Função para cadastrar novos jogadores
+void cadastrar_jogadores(JOGADOR **vetor, int *tamanho) {
+    int capacidade = *tamanho + TAM_INICIAL;
+    *vetor = (JOGADOR *)realloc(*vetor, capacidade * sizeof(JOGADOR));
+
     while (1) {
+        JOGADOR jogador;
+
         printf("\nNome do jogador (ou 'fim' para encerrar):\n");
         lestring(jogador.Nomejogador, 20);
         if (strcmp(jogador.Nomejogador, "fim") == 0) {
@@ -51,7 +88,6 @@ void cadastrar_jogadores() {
         lestring(jogador.POSICAO, 20);
 
         printf("DIGITE OS ATRIBUTOS DESSE JOGADOR\n");
-
         printf("VELOCIDADE:\n");
         scanf("%d", &jogador.VELOCIDADE);
         printf("CHUTE:\n");
@@ -64,91 +100,61 @@ void cadastrar_jogadores() {
         scanf("%d", &jogador.DEFESA);
         printf("FISICO:\n");
         scanf("%d", &jogador.FISICO);
-        setbuf(stdin, NULL); // Limpa o buffer
+        setbuf(stdin, NULL);
 
-        fwrite(&jogador, sizeof(JOGADOR), 1, arq);
+        // Adiciona o jogador ao vetor
+        (*vetor)[*tamanho] = jogador;
+        (*tamanho)++;
     }
-    fclose(arq);
 }
 
 // Função para pesquisar jogadores por nome
-void pesquisar_jogador() {
-    FILE *arq = fopen("jogadores.dat", "rb");
-    if (arq == NULL) {
-        printf("Erro ao abrir o arquivo.\n");
-        return;
-    }
-
+void pesquisar_jogador(JOGADOR *vetor, int tamanho) {
     char nome[20];
     printf("\nDigite o nome do jogador para pesquisar:\n");
     lestring(nome, 20);
 
-    JOGADOR jogador;
-    int encontrado = 0;
-
-    while (fread(&jogador, sizeof(JOGADOR), 1, arq) == 1) {
-        if (strcmp(jogador.Nomejogador, nome) == 0) {
+    for (int i = 0; i < tamanho; i++) {
+        if (strcmp(vetor[i].Nomejogador, nome) == 0) {
             printf("\nJogador encontrado:\n");
             printf("Nome: %s, Nacionalidade: %s, Clube: %s, Posição: %s\n", 
-                   jogador.Nomejogador, jogador.Nacionalidade, jogador.Clube, jogador.POSICAO);
+                   vetor[i].Nomejogador, vetor[i].Nacionalidade, vetor[i].Clube, vetor[i].POSICAO);
             printf("VELOCIDADE: %d, CHUTE: %d, PASSE: %d, DRIBLE: %d, DEFESA: %d, FISICO: %d\n", 
-                   jogador.VELOCIDADE, jogador.CHUTE, jogador.PASSE, jogador.DRIBLE, jogador.DEFESA, jogador.FISICO);
-            encontrado = 1;
-            break;
+                   vetor[i].VELOCIDADE, vetor[i].CHUTE, vetor[i].PASSE, vetor[i].DRIBLE, vetor[i].DEFESA, vetor[i].FISICO);
+            return;
         }
     }
-    if (!encontrado) {
-        printf("Jogador não encontrado.\n");
-    }
-
-    fclose(arq);
+    printf("Jogador não encontrado.\n");
 }
 
 // Função para excluir um jogador pelo nome
-void excluir_jogador() {
-    FILE *arq = fopen("jogadores.dat", "rb");
-    if (arq == NULL) {
-        printf("Erro ao abrir o arquivo.\n");
-        return;
-    }
-
-    FILE *temp = fopen("temp.dat", "wb");
-    if (temp == NULL) {
-        printf("Erro ao criar arquivo temporário.\n");
-        fclose(arq);
-        return;
-    }
-
+void excluir_jogador(JOGADOR **vetor, int *tamanho) {
     char nome[20];
     printf("\nDigite o nome do jogador para excluir:\n");
     lestring(nome, 20);
 
-    JOGADOR jogador;
-    int encontrado = 0;
+    for (int i = 0; i < *tamanho; i++) {
+        if (strcmp((*vetor)[i].Nomejogador, nome) == 0) {
+            printf("Jogador %s excluído com sucesso.\n", nome);
 
-    while (fread(&jogador, sizeof(JOGADOR), 1, arq) == 1) {
-        if (strcmp(jogador.Nomejogador, nome) != 0) {
-            fwrite(&jogador, sizeof(JOGADOR), 1, temp);
-        } else {
-            encontrado = 1;
+            // Remove o jogador movendo os elementos seguintes para trás
+            for (int j = i; j < *tamanho - 1; j++) {
+                (*vetor)[j] = (*vetor)[j + 1];
+            }
+
+            (*tamanho)--;
+            *vetor = (JOGADOR *)realloc(*vetor, (*tamanho) * sizeof(JOGADOR));
+            return;
         }
     }
-
-    fclose(arq);
-    fclose(temp);
-
-    if (encontrado) {
-        remove("jogadores.dat");
-        rename("temp.dat", "jogadores.dat");
-        printf("Jogador excluído com sucesso.\n");
-    } else {
-        remove("temp.dat");
-        printf("Jogador não encontrado.\n");
-    }
+    printf("Jogador não encontrado.\n");
 }
 
 // Função principal com menu
 int main() {
+    int tamanho;
+    JOGADOR *vetor = carregar_jogadores(&tamanho);
+
     int opcao;
 
     do {
@@ -159,17 +165,19 @@ int main() {
         printf("4. Sair\n");
         printf("Escolha uma opção: ");
         scanf("%d", &opcao);
-        setbuf(stdin, NULL); // Limpa o buffer
+        setbuf(stdin, NULL);
 
         switch (opcao) {
             case 1:
-                cadastrar_jogadores();
+                cadastrar_jogadores(&vetor, &tamanho);
+                salvar_jogadores(vetor, tamanho);
                 break;
             case 2:
-                pesquisar_jogador();
+                pesquisar_jogador(vetor, tamanho);
                 break;
             case 3:
-                excluir_jogador();
+                excluir_jogador(&vetor, &tamanho);
+                salvar_jogadores(vetor, tamanho);
                 break;
             case 4:
                 printf("Saindo do programa...\n");
@@ -179,5 +187,6 @@ int main() {
         }
     } while (opcao != 4);
 
+    free(vetor);
     return 0;
 }
