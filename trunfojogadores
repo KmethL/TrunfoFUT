@@ -2,13 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TAM_INICIAL 5
-
 // Função para ler uma string com controle de tamanho
 void lestring(char texto[], int tamanho) {
     setbuf(stdin, NULL);
     fgets(texto, tamanho, stdin);
     texto[strcspn(texto, "\n")] = '\0';
+
 }
 
 // Definição da estrutura JOGADOR
