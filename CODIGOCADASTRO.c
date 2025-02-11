@@ -30,8 +30,8 @@ void cadastrarJogadores(Jogador *jogadores, int *qtd) {
     fgets(jogadores[*qtd].posicao, sizeof(jogadores[*qtd].posicao), stdin);
     jogadores[*qtd].posicao[strcspn(jogadores[*qtd].posicao, "\n")] = '\0';
 
-    printf("Velocidade: ");
-    scanf("%d", &jogadores[*qtd].velocidade);
+    printf("ritmo: ");
+    scanf("%d", &jogadores[*qtd].ritmo);
     printf("Chute: ");
     scanf("%d", &jogadores[*qtd].chute);
     printf("Passe: ");
