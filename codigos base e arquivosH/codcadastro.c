@@ -115,7 +115,6 @@ void importarJogadores(Jogador *jogadores, int *qtd) {
     while (fgets(linha, sizeof(linha), file) != NULL) {
         if (*qtd >= 50) break;
 
-        // Parse a linha CSV
         sscanf(linha, "%[^,],%[^,],%[^,],%[^,],%d,%d,%d,%d,%d,%d",
                jogadores[*qtd].nome, jogadores[*qtd].nacionalidade, jogadores[*qtd].clube,
                jogadores[*qtd].posicao, &jogadores[*qtd].ritmo, &jogadores[*qtd].chute,
