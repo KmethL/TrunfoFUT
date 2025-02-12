@@ -10,8 +10,8 @@ void jogar(Jogador *jogadores, int qtd) {
     }
     
     srand(time(NULL));
-    int jogadorHumano = rand() % 2; // Sorteia quem começa (0: humano, 1: computador)
-    int atributoAnterior = -1; // Nenhum atributo foi escolhido ainda
+    int jogadorHumano = rand() % 2; //sorteia quem começa (0: humano, 1: computador)
+    int atributoAnterior = -1; //n enhum atributo foi escolhido ainda
     
     Jogador *timeHumano[11];
     Jogador *timeComputador[11];
@@ -20,13 +20,13 @@ void jogar(Jogador *jogadores, int qtd) {
     char formacao[10];
     fgets(formacao, sizeof(formacao), stdin);
     
-    // Seleciona jogadores aleatoriamente para cada posição (exceto o GOAT)
+    //seleciona jogadores aleatoriamente para cada posição (exceto o GOAT)
     for (int i = 0; i < 10; i++) {
         timeHumano[i] = &jogadores[rand() % qtd];
         timeComputador[i] = &jogadores[rand() % qtd];
     }
     
-    // Define o GOAT
+    //define o GOAT
     timeHumano[10] = &CR7;
     timeComputador[10] = &Messi;
     
@@ -52,14 +52,25 @@ void jogar(Jogador *jogadores, int qtd) {
         int valorJogador, valorAdversario;
         switch (atributo) {
             case 1: valorJogador = jogadorAtual->velocidade; valorAdversario = adversario->velocidade; break;
+
+            
             case 2: valorJogador = jogadorAtual->chute; valorAdversario = adversario->chute; break;
+
+            
             case 3: valorJogador = jogadorAtual->passe; valorAdversario = adversario->passe; break;
+
+            
             case 4: valorJogador = jogadorAtual->drible; valorAdversario = adversario->drible; break;
+
+            
             case 5: valorJogador = jogadorAtual->defesa; valorAdversario = adversario->defesa; break;
+
+            
             case 6: valorJogador = jogadorAtual->fisico; valorAdversario = adversario->fisico; break;
         }
         
         printf("%s: %d vs %s: %d\n", jogadorAtual->nome, valorJogador, adversario->nome, valorAdversario);
+       
         if (valorJogador > valorAdversario) {
             printf("Você venceu esta rodada!\n");
         } else if (valorJogador < valorAdversario) {
