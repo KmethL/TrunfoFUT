@@ -52,7 +52,7 @@ int main() {
     srand(time(NULL)); //gerador de numeros aleatorios
     Jogador *jogadores = NULL; //ponteiro para armazenar os jogadores dinamicamente
     int qtd = 0; //quantidade de jogadores cadastrados
-    char opcao[10]; //rrmazena a opcao do usuario
+    char opcao[10]; //armazena a opcao do usuario
 
     do {
         printf("\n--- MENU ---\n");
