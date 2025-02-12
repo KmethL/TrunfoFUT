@@ -30,7 +30,7 @@ void cadastrarJogadores(Jogador *jogadores, int *qtd) {
     fgets(jogadores[*qtd].posicao, sizeof(jogadores[*qtd].posicao), stdin);
     jogadores[*qtd].posicao[strcspn(jogadores[*qtd].posicao, "\n")] = '\0';
 
-    printf("ritmo: ");
+    printf("Ritmo: ");
     scanf("%d", &jogadores[*qtd].ritmo);
     printf("Chute: ");
     scanf("%d", &jogadores[*qtd].chute);
@@ -79,4 +79,97 @@ void excluirJogador(Jogador *jogadores, int *qtd) {
     }
     (*qtd)--;
     printf("Jogador removido com sucesso!\n");
+}
+
+void exportarJogadores(Jogador *jogadores, int qtd) {
+    FILE *file = fopen("jogadores_fifa.csv", "w");
+    if (!file) {
+        printf("Erro ao abrir o arquivo para escrita.\n");
+        return;
+    }
+
+    fprintf(file, "Nome,Nacionalidade,Clube,Posição,Ritmo,Chute,Passe,Drible,Defesa,Físico\n");
+
+    for (int i = 0; i < qtd; i++) {
+        fprintf(file, "%s,%s,%s,%s,%d,%d,%d,%d,%d,%d\n",
+                jogadores[i].nome, jogadores[i].nacionalidade, jogadores[i].clube,
+                jogadores[i].posicao, jogadores[i].ritmo, jogadores[i].chute,
+                jogadores[i].passe, jogadores[i].drible, jogadores[i].defesa,
+                jogadores[i].fisico);
+    }
+
+    fclose(file);
+    printf("Dados exportados com sucesso para jogadores_fifa.csv.\n");
+}
+
+void importarJogadores(Jogador *jogadores, int *qtd) {
+    FILE *file = fopen("jogadores_fifa.csv", "r");
+    if (!file) {
+        printf("Erro ao abrir o arquivo para leitura.\n");
+        return;
+    }
+
+    char linha[256];
+    fgets(linha, sizeof(linha), file); // Ignorar o cabeçalho
+
+    while (fgets(linha, sizeof(linha), file) != NULL) {
+        if (*qtd >= 50) break;
+
+        // Parse a linha CSV
+        sscanf(linha, "%[^,],%[^,],%[^,],%[^,],%d,%d,%d,%d,%d,%d",
+               jogadores[*qtd].nome, jogadores[*qtd].nacionalidade, jogadores[*qtd].clube,
+               jogadores[*qtd].posicao, &jogadores[*qtd].ritmo, &jogadores[*qtd].chute,
+               &jogadores[*qtd].passe, &jogadores[*qtd].drible, &jogadores[*qtd].defesa,
+               &jogadores[*qtd].fisico);
+
+        (*qtd)++;
+    }
+
+    fclose(file);
+    printf("Dados importados com sucesso.\n");
+}
+
+int main() {
+    Jogador jogadores[50];
+    int qtd = 0;
+    int opcao;
+
+    do {
+        printf("\nMenu:\n");
+        printf("1. Cadastrar Jogador\n");
+        printf("2. Listar Jogadores\n");
+        printf("3. Excluir Jogador\n");
+        printf("4. Exportar Dados para CSV\n");
+        printf("5. Importar Dados de CSV\n");
+        printf("6. Sair\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcao);
+        limparBuffer();
+
+        switch (opcao) {
+            case 1:
+                cadastrarJogadores(jogadores, &qtd);
+                break;
+            case 2:
+                listarJogadores(jogadores, qtd);
+                break;
+            case 3:
+                excluirJogador(jogadores, &qtd);
+                break;
+            case 4:
+                exportarJogadores(jogadores, qtd);
+                break;
+            case 5:
+                importarJogadores(jogadores, &qtd);
+                break;
+            case 6:
+                printf("Saindo...\n");
+                break;
+            default:
+                printf("Opção inválida! Tente novamente.\n");
+                break;
+        }
+    } while (opcao != 6);
+
+    return 0;
 }
