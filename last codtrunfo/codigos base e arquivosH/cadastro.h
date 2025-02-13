@@ -1,4 +1,4 @@
-#ifndef JOGADOR_H 
+#ifndef JOGADOR_H //evita inclusões múltiplas
 #define JOGADOR_H
 
 #include <stdio.h>
@@ -7,6 +7,7 @@
 
 #define TAM_INICIAL 30
 
+//estrutura JOGADOR
 typedef struct {
     char *Nomejogador;
     char *Nacionalidade;
@@ -21,11 +22,11 @@ typedef struct {
     char *HISTORIA;
 } JOGADOR;
 
-// Declaração das funções
+// funções
 void cadastrar_jogadores();
 void importar_csv();
 void pesquisar_jogador();
 void excluir_jogador();
 void exportar_csv();
-
+void lestring(char texto[], int tamanho);
 #endif
