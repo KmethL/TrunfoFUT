@@ -4,14 +4,12 @@
 
 #define TAM_INICIAL 30
 
-//função para ler uma string com controle de tamanho
 void lestring(char texto[], int tamanho) {
     setbuf(stdin, NULL);
     fgets(texto, tamanho, stdin);
     texto[strcspn(texto, "\n")] = '\0';
 }
 
-//definição da estrutura JOGADOR
 typedef struct {
     char Nomejogador[20];
     char Nacionalidade[20];
@@ -25,9 +23,8 @@ typedef struct {
     int FISICO;
 } JOGADOR;
 
-//função para cadastrar novos jogadores
 void cadastrar_jogadores() {
-    FILE *arq = fopen("jogadores.dat", "ab");
+    FILE *arq = fopen("jogadores.csv", "a");
     if (arq == NULL) {
         printf("Erro ao abrir o arquivo.\n");
         return;
@@ -43,15 +40,26 @@ void cadastrar_jogadores() {
 
         printf("Nacionalidade:\n");
         lestring(jogador.Nacionalidade, 20);
-
         printf("Clube:\n");
         lestring(jogador.Clube, 20);
+        
+        int posicao;
+        do {
+            printf("Escolha a POSICAO:\n");
+            printf("1 - ZAGUEIRO\n2 - LATERAL\n3 - MEIA\n4 - ATACANTE\n");
+            scanf("%d", &posicao);
+            setbuf(stdin, NULL);
 
-        printf("POSICAO (ZAGUEIRO, LATERAL, MEIA, ATACANTE):\n");
-        lestring(jogador.POSICAO, 20);
+            switch (posicao) {
+                case 1: strcpy(jogador.POSICAO, "ZAGUEIRO"); break;
+                case 2: strcpy(jogador.POSICAO, "LATERAL"); break;
+                case 3: strcpy(jogador.POSICAO, "MEIA"); break;
+                case 4: strcpy(jogador.POSICAO, "ATACANTE"); break;
+                default: printf("Opcao invalida. Tente novamente.\n");
+            }
+        } while (posicao < 1 || posicao > 4);
 
         printf("DIGITE OS ATRIBUTOS DESSE JOGADOR\n");
-
         printf("ritmo:\n");
         scanf("%d", &jogador.ritmo);
         printf("CHUTE:\n");
@@ -64,16 +72,32 @@ void cadastrar_jogadores() {
         scanf("%d", &jogador.DEFESA);
         printf("FISICO:\n");
         scanf("%d", &jogador.FISICO);
-        setbuf(stdin, NULL); // Limpa o buffer
+        setbuf(stdin, NULL);
 
-        fwrite(&jogador, sizeof(JOGADOR), 1, arq);
+        fprintf(arq, "%s,%s,%s,%s,%d,%d,%d,%d,%d,%d\n",
+                jogador.Nomejogador, jogador.Nacionalidade, jogador.Clube, jogador.POSICAO,
+                jogador.ritmo, jogador.CHUTE, jogador.PASSE, jogador.DRIBLE, jogador.DEFESA, jogador.FISICO);
     }
     fclose(arq);
 }
 
-//função para pesquisar jogadores por nome
+void importar_csv() {
+    FILE *arq = fopen("jogadores.csv", "r");
+    if (arq == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
+    }
+
+    printf("\nJogadores cadastrados:\n");
+    char linha[200];
+    while (fgets(linha, 200, arq)) {
+        printf("%s", linha);
+    }
+    fclose(arq);
+}
+
 void pesquisar_jogador() {
-    FILE *arq = fopen("jogadores.dat", "rb");
+    FILE *arq = fopen("jogadores.csv", "r");
     if (arq == NULL) {
         printf("Erro ao abrir o arquivo.\n");
         return;
@@ -83,36 +107,29 @@ void pesquisar_jogador() {
     printf("\nDigite o nome do jogador para pesquisar:\n");
     lestring(nome, 20);
 
-    JOGADOR jogador;
+    char linha[200];
     int encontrado = 0;
-
-    while (fread(&jogador, sizeof(JOGADOR), 1, arq) == 1) {
-        if (strcmp(jogador.Nomejogador, nome) == 0) {
-            printf("\nJogador encontrado:\n");
-            printf("Nome: %s, Nacionalidade: %s, Clube: %s, Posição: %s\n", 
-                   jogador.Nomejogador, jogador.Nacionalidade, jogador.Clube, jogador.POSICAO);
-            printf("ritmo: %d, CHUTE: %d, PASSE: %d, DRIBLE: %d, DEFESA: %d, FISICO: %d\n", 
-                   jogador.ritmo, jogador.CHUTE, jogador.PASSE, jogador.DRIBLE, jogador.DEFESA, jogador.FISICO);
+    while (fgets(linha, 200, arq)) {
+        if (strstr(linha, nome) != NULL) {
+            printf("%s", linha);
             encontrado = 1;
-            break;
         }
     }
-    if (!encontrado) {
-        printf("Jogador não encontrado.\n");
-    }
 
+    if (!encontrado) {
+        printf("Jogador nao encontrado.\n");
+    }
     fclose(arq);
 }
 
-// Função para excluir um jogador pelo nome
 void excluir_jogador() {
-    FILE *arq = fopen("jogadores.dat", "rb");
+    FILE *arq = fopen("jogadores.csv", "r");
     if (arq == NULL) {
         printf("Erro ao abrir o arquivo.\n");
         return;
     }
 
-    FILE *temp = fopen("temp.dat", "wb");
+    FILE *temp = fopen("temp.csv", "w");
     if (temp == NULL) {
         printf("Erro ao criar arquivo temporario.\n");
         fclose(arq);
@@ -123,12 +140,12 @@ void excluir_jogador() {
     printf("\nDigite o nome do jogador para excluir:\n");
     lestring(nome, 20);
 
-    JOGADOR jogador;
+    char linha[200];
     int encontrado = 0;
 
-    while (fread(&jogador, sizeof(JOGADOR), 1, arq) == 1) {
-        if (strcmp(jogador.Nomejogador, nome) != 0) {
-            fwrite(&jogador, sizeof(JOGADOR), 1, temp);
+    while (fgets(linha, 200, arq)) {
+        if (strstr(linha, nome) == NULL) {
+            fprintf(temp, "%s", linha);
         } else {
             encontrado = 1;
         }
@@ -138,45 +155,61 @@ void excluir_jogador() {
     fclose(temp);
 
     if (encontrado) {
-        remove("jogadores.dat");
-        rename("temp.dat", "jogadores.dat");
+        remove("jogadores.csv");
+        rename("temp.csv", "jogadores.csv");
         printf("Jogador excluído com sucesso.\n");
     } else {
-        remove("temp.dat");
+        remove("temp.csv");
         printf("Jogador nao encontrado.\n");
     }
 }
 
-// Função principal com menu
+void exportar_csv() {
+    FILE *arq = fopen("jogadores.csv", "r");
+    if (arq == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
+    }
+
+    FILE *exp = fopen("exportados.csv", "w");
+    if (exp == NULL) {
+        printf("Erro ao criar arquivo exportado.\n");
+        fclose(arq);
+        return;
+    }
+
+    char linha[200];
+    while (fgets(linha, 200, arq)) {
+        fprintf(exp, "%s", linha);
+    }
+    fclose(arq);
+    fclose(exp);
+    printf("Arquivo exportado com sucesso!\n");
+}
+
 int main() {
     int opcao;
-
     do {
         printf("\n--- MENU ---\n");
         printf("1. Cadastrar novos jogadores\n");
-        printf("2. Pesquisar jogador\n");
-        printf("3. Excluir jogador\n");
-        printf("4. Sair\n");
+        printf("2. Importar jogadores do CSV\n");
+        printf("3. Exportar jogadores para CSV\n");
+        printf("4. Pesquisar jogador\n");
+        printf("5. Excluir jogador\n");
+        printf("6. Sair\n");
         printf("Escolha uma opcao: ");
         scanf("%d", &opcao);
-        setbuf(stdin, NULL); // Limpa o buffer
+        setbuf(stdin, NULL);
 
         switch (opcao) {
-            case 1:
-                cadastrar_jogadores();
-                break;
-            case 2:
-                pesquisar_jogador();
-                break;
-            case 3:
-                excluir_jogador();
-                break;
-            case 4:
-                printf("Saindo do programa...\n");
-                break;
-            default:
-                printf("Opcao invalida. Tente novamente.\n");
+            case 1: cadastrar_jogadores(); break;
+            case 2: importar_csv(); break;
+            case 3: exportar_csv(); break;
+            case 4: pesquisar_jogador(); break;
+            case 5: excluir_jogador(); break;
+            case 6: printf("Saindo do programa...\n"); break;
+            default: printf("Opcao invalida. Tente novamente.\n");
         }
-    } while (opcao != 4);
+    } while (opcao != 6);
     return 0;
 }
