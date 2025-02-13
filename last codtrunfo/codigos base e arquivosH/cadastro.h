@@ -1,21 +1,31 @@
-#ifndef CADASTRO_H
-#define CADASTRO_H
+#ifndef JOGADOR_H 
+#define JOGADOR_H
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define TAM_INICIAL 30
 
 typedef struct {
-    char nome[100];
-    char nacionalidade[50];
-    char clube[50];
-    char posicao[20];
+    char *Nomejogador;
+    char *Nacionalidade;
+    char *Clube;
+    char *POSICAO;
     int ritmo;
-    int chute;
-    int passe;
-    int drible;
-    int defesa;
-    int fisico;
-} Jogador;
+    int CHUTE;
+    int PASSE;
+    int DRIBLE;
+    int DEFESA;
+    int FISICO;
+    char *HISTORIA;
+} JOGADOR;
 
-void cadastrarJogadores(Jogador *jogadores, int *qtd);
-void listarJogadores(Jogador *jogadores, int qtd);
-void excluirJogador(Jogador *jogadores, int *qtd);
+// Declaração das funções
+void cadastrar_jogadores();
+void importar_csv();
+void pesquisar_jogador();
+void excluir_jogador();
+void exportar_csv();
 
 #endif
