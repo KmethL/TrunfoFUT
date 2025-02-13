@@ -21,6 +21,7 @@ typedef struct {
     int DRIBLE;
     int DEFESA;
     int FISICO;
+    char HISTORIA [5000];
 } JOGADOR;
 
 void cadastrar_jogadores() {
@@ -73,10 +74,12 @@ void cadastrar_jogadores() {
         printf("FISICO:\n");
         scanf("%d", &jogador.FISICO);
         setbuf(stdin, NULL);
+        printf("Conte a Historia desse jogador: \n");
+        lestring(jogador.HISTORIA, 5000);
 
-        fprintf(arq, "%s,%s,%s,%s,%d,%d,%d,%d,%d,%d\n",
+        fprintf(arq, "Nome: %s, Nacionalidade: %s, Clube: %s, Posicao: %s, Ritmo: %d, Chute: %d, Passe: %d, Drible: %d, Defesa: %d, Fisico: %d, Historia: %s \n",
                 jogador.Nomejogador, jogador.Nacionalidade, jogador.Clube, jogador.POSICAO,
-                jogador.ritmo, jogador.CHUTE, jogador.PASSE, jogador.DRIBLE, jogador.DEFESA, jogador.FISICO);
+                jogador.ritmo, jogador.CHUTE, jogador.PASSE, jogador.DRIBLE, jogador.DEFESA, jogador.FISICO, jogador.HISTORIA);
     }
     fclose(arq);
 }
@@ -157,7 +160,7 @@ void excluir_jogador() {
     if (encontrado) {
         remove("jogadores.csv");
         rename("temp.csv", "jogadores.csv");
-        printf("Jogador excluído com sucesso.\n");
+        printf("Jogador excluido com sucesso.\n");
     } else {
         remove("temp.csv");
         printf("Jogador nao encontrado.\n");
