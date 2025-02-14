@@ -65,7 +65,7 @@ void excluirJogador(Jogador *jogadores, int *qtd) {
     }
     listarJogadores(jogadores, *qtd);
     int id;
-    printf("Digite o número do jogador a ser removido: ");
+    printf("Digite o numero do jogador a ser removido: ");
     scanf("%d", &id);
     limparBuffer();
     
@@ -141,7 +141,7 @@ int main() {
         printf("4. Exportar Dados para CSV\n");
         printf("5. Importar Dados de CSV\n");
         printf("6. Sair\n");
-        printf("Escolha uma opção: ");
+        printf("Escolha uma opcao: ");
         scanf("%d", &opcao);
         limparBuffer();
 
@@ -165,7 +165,7 @@ int main() {
                 printf("Saindo...\n");
                 break;
             default:
-                printf("Opção inválida! Tente novamente.\n");
+                printf("Opcao invalida! Tente novamente.\n");
                 break;
         }
     } while (opcao != 6);
