@@ -4,6 +4,8 @@
 
 my cool new project
 
+Rodar: cadastroCerto.c
+
 ### Features
 
  - $(Project Feature 01)
